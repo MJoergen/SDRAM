@@ -159,7 +159,11 @@ begin
          rst_i               => rst_i,
          avm_write_i         => dec_write,
          avm_read_i          => dec_read,
-         avm_address_i       => dec_address,
+         -- Make sure all 25 address bits of the SDRAM is used, rather than the 19 address
+         -- bits offered by the Block RAM. Therefore we shift the address 25-19 = 6 bits
+         -- left.
+         avm_address_i       => dec_address xor
+                               (dec_address(25 downto 0) & "000000"),
          avm_writedata_i     => dec_writedata,
          avm_byteenable_i    => dec_byteenable,
          avm_burstcount_i    => dec_burstcount,

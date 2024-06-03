@@ -50,6 +50,7 @@ architecture simulation of tb_sdram_mega65r6 is
    signal   rx_valid : std_logic;
    signal   rx_ready : std_logic;
    signal   rx_data  : std_logic_vector(7 downto 0);
+   signal   rx_str   : std_logic_vector(31 downto 0);
 
 begin
 
@@ -137,29 +138,55 @@ begin
          uart_rx_i  => uart_tx
       ); -- uart_inst
 
+   rx_str_proc : process (sys_clk)
+   begin
+      if rising_edge(sys_clk) then
+         if rx_valid and rx_ready then
+            rx_str <= rx_str(rx_str'left - 8 downto 0) & rx_data;
+         end if;
+      end if;
+   end process rx_str_proc;
+
+
    test_proc : process
    begin
+      report "Test started";
+
       tx_valid <= '0';
       rx_ready <= '1';
       wait until sys_rst = '0';
-      wait for 100 ns;
+
+      -- Wait until SDRAM is initialized
+      wait for 100 us;
       wait until sys_clk = '1';
 
+      -- Wait until initial welcome message is sent.
+      if rx_str /= X"0D0A0D0A" then
+         wait until rx_str = X"0D0A0D0A";
+      end if;
+      wait until sys_clk = '1';
+
+      -- Start test by sending the "RETURN" key.
       tx_data  <= X"0D";
       tx_valid <= '1';
       wait until sys_clk = '1';
-
-      while tx_ready /= '1' loop
-         wait until sys_clk = '1';
-      end loop;
-
+      if tx_ready /= '1' then
+         wait until tx_ready /= '1';
+      end if;
+      wait until sys_clk = '1';
       tx_valid <= '0';
       wait until sys_clk = '1';
 
-      wait for 100 us;
+      -- Wait until new message is started (indicating the test is over).
+      if rx_valid /= '1' then
+         wait until rx_valid = '1';
+      end if;
+      wait until sys_clk = '1';
+
+      wait for 10 us;
+      running  <= '0';
 
       report "Test finished";
-      running  <= '0';
       wait;
    end process test_proc;
 

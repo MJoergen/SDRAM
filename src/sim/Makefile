@@ -5,7 +5,7 @@
 XILINX_DIR = /opt/Xilinx/Vivado/2023.1
 XPM_DIR = ../../../../fransschreuder/xpm_vhdl
 
-#PROJECT = sdram_mega65r6
+PROJECT = sdram_mega65r6
 PROJECT = sdram
 
 TB       = tb_$(PROJECT)
@@ -51,7 +51,7 @@ WAVE     = $(TB).ghw
 sim: $(SOURCES) unisim-obj08.cf xpm-obj08.cf
 	ghdl -i --std=08 -frelaxed-rules -fsynopsys $(SOURCES)
 	ghdl -m --std=08 -frelaxed-rules -fsynopsys $(TB)
-	ghdl -r --std=08 -frelaxed-rules -fsynopsys $(TB) $(GENERICS) --wave=$(WAVE) --stop-time=20us
+	ghdl -r --std=08 -frelaxed-rules -fsynopsys $(TB) $(GENERICS) --wave=$(WAVE) --stop-time=280us
 
 unisim-obj08.cf:
 	ghdl -i --std=08 --work=unisim -frelaxed-rules -fsynopsys $(XILINX_DIR)/data/vhdl/src/unisims/unisim_VCOMP.vhd

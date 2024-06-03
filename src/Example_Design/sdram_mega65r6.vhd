@@ -53,7 +53,9 @@ end entity sdram_mega65r6;
 architecture synthesis of sdram_mega65r6 is
 
    constant C_SYS_ADDRESS_SIZE : integer := G_SYS_ADDRESS_SIZE;
-   constant C_ADDRESS_SIZE     : integer := 22;
+   -- The SDRAM has 32M addresses and 16 data bits,
+   -- i.e. a total of 512 Mbits = 64 MBytes.
+   constant C_ADDRESS_SIZE     : integer := 25;
    constant C_DATA_SIZE        : integer := 16;
 
    -- SDRAM controller clocks and reset

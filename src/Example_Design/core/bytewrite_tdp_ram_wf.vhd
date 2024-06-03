@@ -37,7 +37,7 @@ end entity bytewrite_tdp_ram_wf;
 architecture synthesis of bytewrite_tdp_ram_wf is
 
    type   ram_type is array (0 to G_SIZE - 1) of std_logic_vector(G_NB_COL * G_COL_WIDTH - 1 downto 0);
-   signal ram : ram_type := (others => (others => '1'));
+   shared variable ram_v : ram_type := (others => (others => '1'));
 
 
    signal doa_noreg : std_logic_vector(G_NB_COL * G_COL_WIDTH - 1 downto 0);
@@ -55,12 +55,12 @@ begin
 
             for i in 0 to G_NB_COL - 1 loop
                if wea_i(i) = '1' then
-                  ram(to_integer(addra_i))((i + 1) * G_COL_WIDTH - 1 downto i * G_COL_WIDTH)
-                                  <= dia_i((i + 1) * G_COL_WIDTH - 1 downto i * G_COL_WIDTH);
+                  ram_v(to_integer(addra_i))((i + 1) * G_COL_WIDTH - 1 downto i * G_COL_WIDTH)
+                                    := dia_i((i + 1) * G_COL_WIDTH - 1 downto i * G_COL_WIDTH);
                end if;
             end loop;
 
-            doa_noreg <= ram(to_integer(addra_i));
+            doa_noreg <= ram_v(to_integer(addra_i));
          end if;
          doa_reg <= doa_noreg;
       end if;
@@ -78,12 +78,12 @@ begin
 
             for i in 0 to G_NB_COL - 1 loop
                if web_i(i) = '1' then
-                  ram(to_integer(addrb_i))((i + 1) * G_COL_WIDTH - 1 downto i * G_COL_WIDTH)
-                                  <= dib_i((i + 1) * G_COL_WIDTH - 1 downto i * G_COL_WIDTH);
+                  ram_v(to_integer(addrb_i))((i + 1) * G_COL_WIDTH - 1 downto i * G_COL_WIDTH)
+                                    := dib_i((i + 1) * G_COL_WIDTH - 1 downto i * G_COL_WIDTH);
                end if;
             end loop;
 
-            dob_noreg <= ram(to_integer(addrb_i));
+            dob_noreg <= ram_v(to_integer(addrb_i));
          end if;
          dob_reg <= dob_noreg;
       end if;

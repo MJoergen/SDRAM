@@ -13,7 +13,7 @@ end entity tb_sdram;
 
 architecture simulation of tb_sdram is
 
-   constant C_CLK_PERIOD : time := 10 ns;                  -- 100 MHz
+   constant C_CLK_PERIOD : time := 6 ns;                  -- 166 MHz
 
    signal   clk     : std_logic := '1';
    signal   rst     : std_logic := '1';
@@ -28,18 +28,6 @@ architecture simulation of tb_sdram is
    signal   stat_err_addr : std_logic_vector(31 downto 0);
    signal   stat_err_exp  : std_logic_vector(31 downto 0);
    signal   stat_err_read : std_logic_vector(31 downto 0);
-
-   signal   sys_resetn   : std_logic;
-   signal   sys_csn      : std_logic;
-   signal   sys_ck       : std_logic;
-   signal   sys_rwds     : std_logic;
-   signal   sys_dq       : std_logic_vector(7 downto 0);
-   signal   sys_rwds_in  : std_logic;
-   signal   sys_dq_in    : std_logic_vector(7 downto 0);
-   signal   sys_rwds_out : std_logic;
-   signal   sys_dq_out   : std_logic_vector(7 downto 0);
-   signal   sys_rwds_oe  : std_logic;
-   signal   sys_dq_oe    : std_logic;
 
    -- SDRAM simulation device interface
    signal   sdram_clk     : std_logic;
@@ -74,11 +62,14 @@ begin
    tb_start_proc : process
    begin
       tb_start <= '0';
-      wait for 160 us;
+      wait for 110 us;
       wait until clk = '1';
       tb_start <= '1';
-      wait until clk = '1';
+      wait until tb_active = '1';
       tb_start <= '0';
+      wait until tb_active = '0';
+      wait for 10 us;
+      running <= '0';
       wait;
    end process tb_start_proc;
 
@@ -90,7 +81,7 @@ begin
    core_wrapper_inst : entity work.core_wrapper
       generic map (
          G_SYS_ADDRESS_SIZE => 8,
-         G_ADDRESS_SIZE     => 22,
+         G_ADDRESS_SIZE     => 25,
          G_DATA_SIZE        => 16
       )
       port map (

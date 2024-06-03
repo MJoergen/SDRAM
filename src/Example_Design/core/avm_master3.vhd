@@ -177,12 +177,16 @@ begin
          end case;
 
          if rst_i = '1' then
-            wait_o        <= '0';
-            m_avm_write_o <= '0';
-            m_avm_read_o  <= '0';
-            count         <= (others => '0');
-            waiting       <= 0;
-            state         <= IDLE_ST;
+            wait_o             <= '0';
+            m_avm_write_o      <= '0';
+            m_avm_read_o       <= '0';
+            m_avm_address_o    <= (others => '0');
+            m_avm_writedata_o  <= (others => '0');
+            m_avm_byteenable_o <= (others => '0');
+            m_avm_burstcount_o <= (others => '0');
+            count              <= (others => '0');
+            waiting            <= 0;
+            state              <= IDLE_ST;
          end if;
       end if;
    end process master_proc;
