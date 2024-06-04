@@ -13,7 +13,7 @@ end entity tb_sdram;
 
 architecture simulation of tb_sdram is
 
-   constant C_CLK_PERIOD : time := 6 ns;                  -- 166 MHz
+   constant C_CLK_PERIOD : time := 6 ns;                   -- 166 MHz
 
    signal   clk     : std_logic := '1';
    signal   rst     : std_logic := '1';
@@ -69,7 +69,7 @@ begin
       tb_start <= '0';
       wait until tb_active = '0';
       wait for 10 us;
-      running <= '0';
+      running  <= '0';
       wait;
    end process tb_start_proc;
 
@@ -126,6 +126,10 @@ begin
    ---------------------------------------------------------
 
    sdram_sim_inst : entity work.sdram_sim
+      generic map (
+         G_RAM_DEBUG => false,
+         G_RAM_SIZE  => 8 -- Number of internal address bits
+      )
       port map (
          sdram_clk_i   => sdram_clk,
          sdram_cke_i   => sdram_cke,

@@ -107,6 +107,10 @@ begin
    ---------------------------------------------------------
 
    sdram_sim_inst : entity work.sdram_sim
+      generic map (
+         G_RAM_DEBUG => false,
+         G_RAM_SIZE  => 8 -- Number of internal address bits
+      )
       port map (
          sdram_clk_i   => sdram_clk,
          sdram_cke_i   => sdram_cke,

@@ -40,8 +40,10 @@ end entity avm_verifier;
 
 architecture synthesis of avm_verifier is
 
-   signal wr_en    : std_logic_vector(G_DATA_SIZE / 8 - 1 downto 0);
-   signal mem_data : std_logic_vector(G_DATA_SIZE - 1 downto 0);
+   signal avm_address   : std_logic_vector(G_ADDRESS_SIZE - 1 downto 0);
+   signal avm_writedata : std_logic_vector(G_DATA_SIZE - 1 downto 0);
+   signal wr_en         : std_logic_vector(G_DATA_SIZE / 8 - 1 downto 0);
+   signal mem_data      : std_logic_vector(G_DATA_SIZE - 1 downto 0);
 
    -- Debug counters
    signal req_count  : natural range 0 to 1023;
@@ -86,9 +88,18 @@ begin
       end if;
    end process read_proc;
 
-
-   wr_en <= avm_byteenable_i when avm_write_i = '1' and avm_waitrequest_i = '0' else
-            (others => '0');
+   -- Register inputs for better timing
+   reg_proc : process (clk_i)
+   begin
+      if rising_edge(clk_i) then
+         avm_address   <= avm_address_i;
+         avm_writedata <= avm_writedata_i;
+         wr_en         <= (others => '0');
+         if avm_write_i = '1' and avm_waitrequest_i = '0' then
+            wr_en <= avm_byteenable_i;
+         end if;
+      end if;
+   end process reg_proc;
 
    bytewrite_tdp_ram_wf_inst : entity work.bytewrite_tdp_ram_wf
       generic map (
@@ -103,8 +114,8 @@ begin
          clka_i  => clk_i,
          ena_i   => '1',
          wea_i   => wr_en,
-         addra_i => avm_address_i,
-         dia_i   => avm_writedata_i,
+         addra_i => avm_address,
+         dia_i   => avm_writedata,
          doa_o   => mem_data,
          clkb_i  => '0',
          enb_i   => '0',
