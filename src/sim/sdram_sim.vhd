@@ -74,6 +74,7 @@ architecture simulation of sdram_sim is
    signal   dqm_dd       : std_logic_vector(1 downto 0);
    signal   dqm_ddd      : std_logic_vector(1 downto 0);
    signal   sdram_dq_out : std_logic_vector(15 downto 0);
+   signal   sdram_dq     : std_logic_vector(15 downto 0);
 
    type     mode_type is record
       -- CAS: Initial value is 1, which will result in read error, if "SET MODE" command is not
@@ -90,17 +91,21 @@ architecture simulation of sdram_sim is
       active           : std_logic;
       next_allowed_cmd : time;
    end record bank_type;
+
    type     bank_vector_type is array (natural range <>) of bank_type;
    signal   banks : bank_vector_type(0 to 3);
 
 begin
 
-   dqm                      <= sdram_dqmh_i & sdram_dqml_i;
+   dqm                   <= sdram_dqmh_i & sdram_dqml_i;
 
-   sdram_dq_io(15 downto 8) <= sdram_dq_out(15 downto 8) when dqm_ddd(1) = '0' else
-                               (others => 'Z');
-   sdram_dq_io( 7 downto 0) <= sdram_dq_out( 7 downto 0) when dqm_ddd(0) = '0' else
-                               (others => 'Z');
+   sdram_dq(15 downto 8) <= sdram_dq_out(15 downto 8) when dqm_ddd(1) = '0' else
+                            (others => 'Z');
+   sdram_dq( 7 downto 0) <= sdram_dq_out( 7 downto 0) when dqm_ddd(0) = '0' else
+                            (others => 'Z');
+
+   -- The value 0.5 ns is the estimated round-trip delay on the PCB
+   sdram_dq_io           <= transport sdram_dq after 0.5 ns;
 
    ram_proc : process (sdram_clk_i)
       variable ram_v  : ram_type(0 to 2 ** G_RAM_SIZE - 1) := (others => X"FFFF");

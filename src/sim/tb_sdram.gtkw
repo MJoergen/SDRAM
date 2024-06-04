@@ -1,15 +1,15 @@
 [*]
 [*] GTKWave Analyzer v3.3.104 (w)1999-2020 BSI
-[*] Mon Jun  3 19:05:43 2024
+[*] Tue Jun  4 09:26:38 2024
 [*]
 [dumpfile] "/home/mike/git/MJoergen/SDRAM/src/sim/tb_sdram.ghw"
-[dumpfile_mtime] "Mon Jun  3 19:04:12 2024"
-[dumpfile_size] 4259459
+[dumpfile_mtime] "Tue Jun  4 09:26:03 2024"
+[dumpfile_size] 4280370
 [savefile] "/home/mike/git/MJoergen/SDRAM/src/sim/tb_sdram.gtkw"
-[timestart] 101759200000
+[timestart] 0
 [size] 1644 950
 [pos] 2039 61
-*-25.763836 101949100000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+*-35.708233 101949100000 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
 [treeopen] top.
 [treeopen] top.tb_sdram.
 [treeopen] top.tb_sdram.core_wrapper_inst.traffic_gen_inst.avm_verifier_inst.
@@ -19,7 +19,7 @@
 [signals_width] 370
 [sst_expanded] 1
 [sst_vpaned_height] 260
-@800200
+@c00200
 -tb_sdram
 @28
 top.tb_sdram.clk
@@ -34,9 +34,7 @@ top.tb_sdram.sdram_ras_n
 top.tb_sdram.sdram_cas_n
 top.tb_sdram.sdram_we_n
 top.tb_sdram.sdram_dqmh
-@29
 top.tb_sdram.sdram_dqml
-@28
 #{top.tb_sdram.sdram_ba[1:0]} top.tb_sdram.sdram_ba[1] top.tb_sdram.sdram_ba[0]
 @22
 #{top.tb_sdram.sdram_a[12:0]} top.tb_sdram.sdram_a[12] top.tb_sdram.sdram_a[11] top.tb_sdram.sdram_a[10] top.tb_sdram.sdram_a[9] top.tb_sdram.sdram_a[8] top.tb_sdram.sdram_a[7] top.tb_sdram.sdram_a[6] top.tb_sdram.sdram_a[5] top.tb_sdram.sdram_a[4] top.tb_sdram.sdram_a[3] top.tb_sdram.sdram_a[2] top.tb_sdram.sdram_a[1] top.tb_sdram.sdram_a[0]
@@ -44,9 +42,9 @@ top.tb_sdram.sdram_dqml
 #{top.tb_sdram.sdram_dq_out[15:0]} top.tb_sdram.sdram_dq_out[15] top.tb_sdram.sdram_dq_out[14] top.tb_sdram.sdram_dq_out[13] top.tb_sdram.sdram_dq_out[12] top.tb_sdram.sdram_dq_out[11] top.tb_sdram.sdram_dq_out[10] top.tb_sdram.sdram_dq_out[9] top.tb_sdram.sdram_dq_out[8] top.tb_sdram.sdram_dq_out[7] top.tb_sdram.sdram_dq_out[6] top.tb_sdram.sdram_dq_out[5] top.tb_sdram.sdram_dq_out[4] top.tb_sdram.sdram_dq_out[3] top.tb_sdram.sdram_dq_out[2] top.tb_sdram.sdram_dq_out[1] top.tb_sdram.sdram_dq_out[0]
 #{top.tb_sdram.sdram_dq_oe_n[15:0]} top.tb_sdram.sdram_dq_oe_n[15] top.tb_sdram.sdram_dq_oe_n[14] top.tb_sdram.sdram_dq_oe_n[13] top.tb_sdram.sdram_dq_oe_n[12] top.tb_sdram.sdram_dq_oe_n[11] top.tb_sdram.sdram_dq_oe_n[10] top.tb_sdram.sdram_dq_oe_n[9] top.tb_sdram.sdram_dq_oe_n[8] top.tb_sdram.sdram_dq_oe_n[7] top.tb_sdram.sdram_dq_oe_n[6] top.tb_sdram.sdram_dq_oe_n[5] top.tb_sdram.sdram_dq_oe_n[4] top.tb_sdram.sdram_dq_oe_n[3] top.tb_sdram.sdram_dq_oe_n[2] top.tb_sdram.sdram_dq_oe_n[1] top.tb_sdram.sdram_dq_oe_n[0]
 #{top.tb_sdram.sdram_dq[15:0]} top.tb_sdram.sdram_dq[15] top.tb_sdram.sdram_dq[14] top.tb_sdram.sdram_dq[13] top.tb_sdram.sdram_dq[12] top.tb_sdram.sdram_dq[11] top.tb_sdram.sdram_dq[10] top.tb_sdram.sdram_dq[9] top.tb_sdram.sdram_dq[8] top.tb_sdram.sdram_dq[7] top.tb_sdram.sdram_dq[6] top.tb_sdram.sdram_dq[5] top.tb_sdram.sdram_dq[4] top.tb_sdram.sdram_dq[3] top.tb_sdram.sdram_dq[2] top.tb_sdram.sdram_dq[1] top.tb_sdram.sdram_dq[0]
-@1000200
+@1401200
 -tb_sdram
-@c00200
+@800200
 -sdram
 @28
 top.tb_sdram.core_wrapper_inst.sdram_inst.clk_i
@@ -82,7 +80,7 @@ top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dqml_o
 #{top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[15:0]} top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[15] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[14] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[13] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[12] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[11] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[10] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[9] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[8] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[7] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[6] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[5] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[4] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[3] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[2] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[1] top.tb_sdram.core_wrapper_inst.sdram_inst.sdram_dq_out_o[0]
 @420
 top.tb_sdram.core_wrapper_inst.sdram_inst.state
-@1401200
+@1000200
 -sdram
 @c00200
 -avm_verifier

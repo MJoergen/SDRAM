@@ -111,7 +111,7 @@ begin
 
    avm_pause_inst : entity work.avm_pause
       generic map (
-         G_PAUSE        => 3,
+         G_PAUSE        => 5,
          G_ADDRESS_SIZE => G_ADDRESS_SIZE,
          G_DATA_SIZE    => G_DATA_SIZE
       )

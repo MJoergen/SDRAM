@@ -221,6 +221,15 @@ architecture synthesis of sdram is
 --   attribute mark_debug of sdram_we_n    : signal is "true";
 --   attribute mark_debug of sdram_dq_in   : signal is "true";
 
+--   attribute mark_debug of avm_waitrequest_o   : signal is "true";
+--   attribute mark_debug of avm_write_i         : signal is "true";
+--   attribute mark_debug of avm_read_i          : signal is "true";
+--   attribute mark_debug of avm_address_i       : signal is "true";
+--   attribute mark_debug of avm_writedata_i     : signal is "true";
+--   attribute mark_debug of avm_byteenable_i    : signal is "true";
+--   attribute mark_debug of avm_readdata_o      : signal is "true";
+--   attribute mark_debug of avm_readdatavalid_o : signal is "true";
+
 begin
 
    avm_waitrequest_o <= '0' when state = IDLE_ST and timer_refresh /= 0 else
@@ -363,9 +372,7 @@ begin
                      sdram_a(9 downto 0) <= avm_address(9 downto 0);    -- column address
                      sdram_a(10)         <= '0';                        -- no automatic precharge
                      sdram_ba            <= avm_address(24 downto 23);  -- bank address
-                     sdram_dqmh          <= '0';
-                     sdram_dqml          <= '0';
-                     timer_cmd           <= C_TIME_CAC;
+                     timer_cmd           <= C_TIME_CAC+1;
                      state               <= READ_ST;
                   end if;
                   if avm_write = '1' then
@@ -397,7 +404,7 @@ begin
                state       <= PRECHARGE_ST;
 
             when READ_ST =>
-               if timer_cmd = C_TIME_QMD + 1 then
+               if timer_cmd = C_TIME_QMD + 2 then
                   sdram_dqmh <= '0';
                   sdram_dqml <= '0';
                end if;
@@ -451,10 +458,10 @@ begin
       end if;
    end process avm_proc;
 
-   -- Sample data from SDRAM on falling edge
+   -- Sample data from SDRAM directly into register
    read_proc : process (clk_i)
    begin
-      if falling_edge(clk_i) then
+      if rising_edge(clk_i) then
          sdram_dq_in <= sdram_dq_in_i;
       end if;
    end process read_proc;

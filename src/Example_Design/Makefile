@@ -49,8 +49,8 @@ $(TOP).tcl: Makefile
 	echo "read_xdc $(XDC)" >> $@
 	echo "set_property XPM_LIBRARIES {XPM_CDC XPM_FIFO} [current_project]" >> $@
 	echo "synth_design -top $(TOP) -part $(PART) -flatten_hierarchy none $(GENERICS)" >> $@
-	#echo "write_checkpoint -force post_synth.dcp" >> $@
-	#echo "source debug.tcl" >> $@
+	echo "write_checkpoint -force post_synth.dcp" >> $@
+	echo "source debug.tcl" >> $@
 	echo "opt_design" >> $@
 	echo "place_design" >> $@
 	echo "phys_opt_design" >> $@

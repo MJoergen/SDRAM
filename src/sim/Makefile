@@ -2,11 +2,13 @@
 # in your OS repository, otherwise it may be downloaded from here:
 # https://github.com/ghdl/ghdl
 
-XILINX_DIR = /opt/Xilinx/Vivado/2023.1
-XPM_DIR = ../../../../fransschreuder/xpm_vhdl
-
-PROJECT = sdram_mega65r6
+# Choose here the target to simulate
+#PROJECT = sdram_mega65r6
 PROJECT = sdram
+
+# The simulation needs the Vivado installation directory
+XILINX_DIR = /opt/Xilinx/Vivado/2023.1
+LIBS = unisim-obj08.cf
 
 TB       = tb_$(PROJECT)
 SOURCES += ../Example_Design/core/avm_decrease.vhd
@@ -18,11 +20,24 @@ SOURCES += ../Example_Design/core/lfsr.vhd
 SOURCES += ../Example_Design/core/random.vhd
 SOURCES += ../Example_Design/core/trafic_gen.vhd
 SOURCES += ../Example_Design/core_wrapper.vhd
+SOURCES += ../sdram/sdram.vhd
+SOURCES += sdram_sim.vhd
+SOURCES += $(TB).vhd
+SAVE     = $(TB).gtkw
+WAVE     = $(TB).ghw
+STOPTIME = 280us
+
+# Additional source files when simulating the toplevel file
+ifeq ($(PROJECT), sdram_mega65r6)
+# The XPM simulation models may be taken from here:
+# https://github.com/fransschreuder/xpm_vhdl
+XPM_DIR = ../../../../fransschreuder/xpm_vhdl
+LIBS += xpm-obj08.cf
+
 SOURCES += ../Example_Design/controller/axi_merger.vhd
 SOURCES += ../Example_Design/controller/merginator.vhd
 SOURCES += ../Example_Design/controller/serializer.vhd
 SOURCES += ../Example_Design/controller_wrapper.vhd
-SOURCES += ../Example_Design/sdram_mega65r6.vhd
 SOURCES += ../Example_Design/mega65/clk.vhd
 SOURCES += ../Example_Design/mega65/uart/uart.vhd
 SOURCES += ../Example_Design/mega65/video/font.vhd
@@ -36,22 +51,15 @@ SOURCES += ../Example_Design/mega65/keyboard/matrix_to_keynum.vhd
 SOURCES += ../Example_Design/mega65/keyboard/mega65kbd_to_matrix.vhd
 SOURCES += ../Example_Design/mega65/keyboard_wrapper.vhd
 SOURCES += ../Example_Design/mega65_wrapper.vhd
-SOURCES += ../sdram/sdram.vhd
-SOURCES += sdram_sim.vhd
-SOURCES += $(TB).vhd
-SAVE     = $(TB).gtkw
-WAVE     = $(TB).ghw
+SOURCES += ../Example_Design/sdram_mega65r6.vhd
+endif
 
+$(WAVE): $(TB)
+	ghdl -r --std=08 -frelaxed-rules -fsynopsys $(TB) --wave=$(WAVE) --stop-time=$(STOPTIME)
 
-#####################################
-# Simulation
-#####################################
-
-.PHONY: sim
-sim: $(SOURCES) unisim-obj08.cf xpm-obj08.cf
+$(TB): $(SOURCES) $(LIBS)
 	ghdl -i --std=08 -frelaxed-rules -fsynopsys $(SOURCES)
 	ghdl -m --std=08 -frelaxed-rules -fsynopsys $(TB)
-	ghdl -r --std=08 -frelaxed-rules -fsynopsys $(TB) $(GENERICS) --wave=$(WAVE) --stop-time=280us
 
 unisim-obj08.cf:
 	ghdl -i --std=08 --work=unisim -frelaxed-rules -fsynopsys $(XILINX_DIR)/data/vhdl/src/unisims/unisim_VCOMP.vhd
@@ -59,6 +67,7 @@ unisim-obj08.cf:
 	ghdl -i --std=08 --work=unisim -frelaxed-rules -fsynopsys $(XILINX_DIR)/data/vhdl/src/unisims/primitive/*.vhd
 
 xpm-obj08.cf:
+ifeq ($(PROJECT), sdram_mega65r6)
 	ghdl -i --std=08 --work=xpm ${XPM_DIR}/src/xpm/xpm_VCOMP.vhd
 	ghdl -i --std=08 --work=xpm ${XPM_DIR}/src/xpm/xpm_cdc/hdl/xpm_cdc_single.vhd
 	ghdl -i --std=08 --work=xpm ${XPM_DIR}/src/xpm/xpm_cdc/hdl/xpm_cdc_array_single.vhd
@@ -87,10 +96,10 @@ xpm-obj08.cf:
 	ghdl -i --std=08 --work=xpm ${XPM_DIR}/src/xpm/xpm_fifo/hdl/xpm_fifo_axil.vhd
 	ghdl -i --std=08 --work=xpm ${XPM_DIR}/src/xpm/xpm_fifo/hdl/xpm_fifo_axis.vhd
 	ghdl -i --std=08 --work=xpm ${XPM_DIR}/src/xpm/xpm_fifo/hdl/xpm_fifo_sync.vhd
+endif
 
 
-$WAVE): sim
-
+.PHONY: show
 show: $(WAVE) $(SAVE)
 	gtkwave $(WAVE) $(SAVE)
 

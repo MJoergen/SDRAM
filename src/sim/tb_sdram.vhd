@@ -107,7 +107,7 @@ begin
          sdram_dq_in_i   => sdram_dq_in,
          sdram_dq_out_o  => sdram_dq_out,
          sdram_dq_oe_n_o => sdram_dq_oe_n
-      ); -- core_inst
+      ); -- core_wrapper_inst
 
    ----------------------------------
    -- Tri-state buffers for SDRAM
