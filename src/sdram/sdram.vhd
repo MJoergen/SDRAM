@@ -15,9 +15,9 @@
 -- Column Address : A0 - A9 (i.e. 1k)
 -- Total : 25 address bits and 16 data bits = 64 MB.
 --
--- Read takes 11 clock cycles.
+-- Read takes 12 clock cycles.
 -- Write takes 8 clock cycles.
--- Single cycle access can be achieved at 166/11 = 15 MHz.
+-- Single cycle access can be achieved at 166/12 = 13.8 MHz.
 -- Refresh takes 12 clock cycles, i.e. about 1% of bandwidth.
 -- This version does not support burst mode.
 --

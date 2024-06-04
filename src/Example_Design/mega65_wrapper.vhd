@@ -54,7 +54,7 @@ end entity mega65_wrapper;
 architecture synthesis of mega65_wrapper is
 
    constant C_CTRL_HZ : natural := 166_000_000;
-   constant C_UART_HZ : natural := 2_000_000;
+   constant C_UART_HZ : natural := 115_200;
 
 begin
 
