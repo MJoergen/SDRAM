@@ -26,8 +26,8 @@ architecture simulation of tb_sdram is
    signal   stat_total    : std_logic_vector(31 downto 0);
    signal   stat_error    : std_logic_vector(31 downto 0);
    signal   stat_err_addr : std_logic_vector(31 downto 0);
-   signal   stat_err_exp  : std_logic_vector(31 downto 0);
-   signal   stat_err_read : std_logic_vector(31 downto 0);
+   signal   stat_err_exp  : std_logic_vector(63 downto 0);
+   signal   stat_err_read : std_logic_vector(63 downto 0);
 
    -- SDRAM simulation device interface
    signal   sdram_clk     : std_logic;
@@ -64,10 +64,14 @@ begin
       tb_start <= '0';
       wait for 110 us;
       wait until clk = '1';
+
+      report "Test started";
       tb_start <= '1';
       wait until tb_active = '1';
       tb_start <= '0';
       wait until tb_active = '0';
+      report "Test finished";
+
       wait for 10 us;
       running  <= '0';
       wait;
@@ -80,9 +84,12 @@ begin
 
    core_wrapper_inst : entity work.core_wrapper
       generic map (
-         G_SYS_ADDRESS_SIZE => 8,
-         G_ADDRESS_SIZE     => 25,
-         G_DATA_SIZE        => 16
+--         G_SYS_ADDRESS_SIZE => 8,
+--         G_ADDRESS_SIZE     => 25,
+--         G_DATA_SIZE        => 16
+         G_SYS_ADDRESS_SIZE => 6,
+         G_ADDRESS_SIZE     => 23,
+         G_DATA_SIZE        => 64
       )
       port map (
          clk_i           => clk,

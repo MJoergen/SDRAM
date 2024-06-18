@@ -37,6 +37,7 @@ SRCS += mega65/keyboard/mega65kbd_to_matrix.vhd
 SRCS += mega65/keyboard_wrapper.vhd
 SRCS += mega65_wrapper.vhd
 SRCS += ../sdram/sdram.vhd
+SRCS += ../sdram/axi_fifo_small.vhd
 
 XDC = $(PLATFORM).xdc
 

@@ -8,7 +8,8 @@ library ieee;
 
 entity sdram_mega65r6 is
    generic (
-      G_SYS_ADDRESS_SIZE : integer := 19;
+--      G_SYS_ADDRESS_SIZE : integer := 19;
+      G_SYS_ADDRESS_SIZE : integer := 17;
       G_FONT_PATH        : string  := ""
    );
    port (
@@ -55,8 +56,10 @@ architecture synthesis of sdram_mega65r6 is
    constant C_SYS_ADDRESS_SIZE : integer := G_SYS_ADDRESS_SIZE;
    -- The SDRAM has 32M addresses and 16 data bits,
    -- i.e. a total of 512 Mbits = 64 MBytes.
-   constant C_ADDRESS_SIZE     : integer := 25;
-   constant C_DATA_SIZE        : integer := 16;
+--   constant C_ADDRESS_SIZE     : integer := 25;
+--   constant C_DATA_SIZE        : integer := 16;
+   constant C_ADDRESS_SIZE     : integer := 23;
+   constant C_DATA_SIZE        : integer := 64;
 
    -- SDRAM controller clocks and reset
    signal   ctrl_clk : std_logic;                          -- SDRAM controller clock
@@ -78,8 +81,8 @@ architecture synthesis of sdram_mega65r6 is
    signal   ctrl_stat_total    : std_logic_vector(31 downto 0);
    signal   ctrl_stat_error    : std_logic_vector(31 downto 0);
    signal   ctrl_stat_err_addr : std_logic_vector(31 downto 0);
-   signal   ctrl_stat_err_exp  : std_logic_vector(31 downto 0);
-   signal   ctrl_stat_err_read : std_logic_vector(31 downto 0);
+   signal   ctrl_stat_err_exp  : std_logic_vector(63 downto 0);
+   signal   ctrl_stat_err_read : std_logic_vector(63 downto 0);
 
    signal   sdram_dq_in   : std_logic_vector(15 downto 0);
    signal   sdram_dq_out  : std_logic_vector(15 downto 0);

@@ -185,6 +185,13 @@ architecture synthesis of sdram is
    signal   avm_byteenable : std_logic_vector( 1 downto 0);
    signal   avm_burstcount : std_logic_vector( 7 downto 0);
 
+   signal   afs_s_ready : std_logic;
+   signal   afs_s_valid : std_logic;
+   signal   afs_s_data  : std_logic_vector(17 downto 0);
+   signal   afs_m_ready : std_logic;
+   signal   afs_m_valid : std_logic;
+   signal   afs_m_data  : std_logic_vector(17 downto 0);
+
    -- SDRAM device output interface
    signal   sdram_a       : std_logic_vector(12 downto 0)   := (others => '0');
    signal   sdram_ba      : std_logic_vector(1 downto 0)    := (others => '0');
@@ -233,6 +240,7 @@ architecture synthesis of sdram is
 begin
 
    avm_waitrequest_o <= '0' when state = IDLE_ST and timer_refresh /= 0 else
+                        '0' when avm_write = '1' and avm_burstcount > 1 else
                         '1';
 
    sdram_a_o         <= sdram_a;
@@ -246,6 +254,29 @@ begin
    sdram_dq_out_o    <= sdram_dq_out;
    sdram_ras_n_o     <= sdram_ras_n;
    sdram_we_n_o      <= sdram_we_n;
+
+   axi_fifo_small_inst : entity work.axi_fifo_small
+      generic map (
+         G_RAM_WIDTH => 16 + 2,
+         G_RAM_DEPTH => C_TIME_RCD + 2
+      )
+      port map (
+         clk_i     => clk_i,
+         rst_i     => rst_i,
+         s_ready_o => afs_s_ready,
+         s_valid_i => afs_s_valid,
+         s_data_i  => afs_s_data,
+         m_ready_i => afs_m_ready,
+         m_valid_o => afs_m_valid,
+         m_data_o  => afs_m_data
+      ); -- axi_fifo_small_inst
+
+   afs_s_valid                     <= avm_write_i and not avm_waitrequest_o;
+   afs_s_data                      <= avm_byteenable_i & avm_writedata_i;
+   afs_m_ready                     <= '1' when state = ACTIVE_ST and timer_cmd = 0 and avm_write = '1' else
+                                      '1' when state = WRITE_ST else
+                                      '0';
+   (avm_byteenable, avm_writedata) <= afs_m_data;
 
    avm_proc : process (clk_i)
    begin
@@ -263,6 +294,10 @@ begin
 
          if timer_refresh > 0 then
             timer_refresh <= timer_refresh - 1;
+         end if;
+
+         if avm_write = '1' and avm_burstcount > 1 then
+            avm_burstcount <= avm_burstcount - 1;
          end if;
 
          -- Default command is NOP
@@ -313,12 +348,12 @@ begin
             when INIT_REFRESH_2_ST =>
                if timer_cmd = 0 then
                   sdram_cs_n          <= '0';
-                  sdram_a             <= (others => '0');               -- Clear all reserved bits
-                  sdram_a(9)          <= '1';                           -- Write burst mode = single location access
-                  sdram_a(8 downto 7) <= "00";                          -- standard operating mode
-                  sdram_a(6 downto 4) <= "011";                         -- CAS latency = 3 (i.e. 166 MHz)
-                  sdram_a(3)          <= '0';                           -- burst type = sequential
-                  sdram_a(2 downto 0) <= "000";                         -- burst length = 1
+                  sdram_a             <= (others => '0');                               -- Clear all reserved bits
+                  sdram_a(9)          <= '0';                                           -- Write burst mode = Read burst mode
+                  sdram_a(8 downto 7) <= "00";                                          -- standard operating mode
+                  sdram_a(6 downto 4) <= "011";                                         -- CAS latency = 3 (i.e. 166 MHz)
+                  sdram_a(3)          <= '0';                                           -- burst type = sequential
+                  sdram_a(2 downto 0) <= "111";                                         -- burst length = full page
                   sdram_ras_n         <= C_MODE_SET(2);
                   sdram_cas_n         <= C_MODE_SET(1);
                   sdram_we_n          <= C_MODE_SET(0);
@@ -343,20 +378,16 @@ begin
                elsif avm_read_i = '1' or avm_write_i = '1' then
                   assert avm_read_i = '0' or avm_write_i = '0'
                      report "Simultaneous READ and WRITE not allowed";
-                  assert avm_burstcount_i = X"01"
-                     report "This controller requires burstcount = 1";
                   avm_read       <= avm_read_i;
                   avm_write      <= avm_write_i;
                   avm_address    <= avm_address_i;
-                  avm_writedata  <= avm_writedata_i;
-                  avm_byteenable <= avm_byteenable_i;
                   avm_burstcount <= avm_burstcount_i;
                   sdram_cs_n     <= '0';
                   sdram_ras_n    <= C_BANK_ACTIVATE(2);
                   sdram_cas_n    <= C_BANK_ACTIVATE(1);
                   sdram_we_n     <= C_BANK_ACTIVATE(0);
-                  sdram_a        <= avm_address_i(22 downto 10);        -- row address
-                  sdram_ba       <= avm_address_i(24 downto 23);        -- bank address
+                  sdram_a        <= avm_address_i(22 downto 10);                        -- row address
+                  sdram_ba       <= avm_address_i(24 downto 23);                        -- bank address
                   timer_cmd      <= C_TIME_RCD - 1;
                   state          <= ACTIVE_ST;
                end if;
@@ -368,11 +399,11 @@ begin
                      sdram_ras_n         <= C_READ(2);
                      sdram_cas_n         <= C_READ(1);
                      sdram_we_n          <= C_READ(0);
-                     sdram_a             <= (others => '0');            -- Clear all reserved bits
-                     sdram_a(9 downto 0) <= avm_address(9 downto 0);    -- column address
-                     sdram_a(10)         <= '0';                        -- no automatic precharge
-                     sdram_ba            <= avm_address(24 downto 23);  -- bank address
-                     timer_cmd           <= C_TIME_CAC+1;
+                     sdram_a             <= (others => '0');                            -- Clear all reserved bits
+                     sdram_a(9 downto 0) <= avm_address(9 downto 0);                    -- column address
+                     sdram_a(10)         <= '0';                                        -- no automatic precharge
+                     sdram_ba            <= avm_address(24 downto 23);                  -- bank address
+                     timer_cmd           <= C_TIME_CAC + to_integer(avm_burstcount);
                      state               <= READ_ST;
                   end if;
                   if avm_write = '1' then
@@ -380,10 +411,10 @@ begin
                      sdram_ras_n         <= C_WRITE(2);
                      sdram_cas_n         <= C_WRITE(1);
                      sdram_we_n          <= C_WRITE(0);
-                     sdram_a             <= (others => '0');            -- Clear all reserved bits
-                     sdram_a(9 downto 0) <= avm_address(9 downto 0);    -- column address
-                     sdram_a(10)         <= '0';                        -- no automatic precharge
-                     sdram_ba            <= avm_address(24 downto 23);  -- bank address
+                     sdram_a             <= (others => '0');                            -- Clear all reserved bits
+                     sdram_a(9 downto 0) <= avm_address(9 downto 0);                    -- column address
+                     sdram_a(10)         <= '0';                                        -- no automatic precharge
+                     sdram_ba            <= avm_address(24 downto 23);                  -- bank address
                      if C_TIME_DMD = 0 then
                         sdram_dqmh    <= not avm_byteenable(1);
                         sdram_dqml    <= not avm_byteenable(0);
@@ -395,29 +426,46 @@ begin
                end if;
 
             when WRITE_ST =>
-               sdram_cs_n  <= '0';
-               sdram_ras_n <= C_PRECHARGE_BANK(2);
-               sdram_cas_n <= C_PRECHARGE_BANK(1);
-               sdram_we_n  <= C_PRECHARGE_BANK(0);
-               sdram_a(10) <= '1';                                      -- precharge all banks
-               timer_cmd   <= C_TIME_RP - 1;
-               state       <= PRECHARGE_ST;
+               if afs_m_valid then
+                  sdram_dqmh    <= not avm_byteenable(1);
+                  sdram_dqml    <= not avm_byteenable(0);
+                  sdram_dq_out  <= avm_writedata;
+                  sdram_dq_oe_n <= (others => '0');
+               else
+                  avm_write   <= '0';
+                  sdram_cs_n  <= '0';
+                  sdram_ras_n <= C_PRECHARGE_BANK(2);
+                  sdram_cas_n <= C_PRECHARGE_BANK(1);
+                  sdram_we_n  <= C_PRECHARGE_BANK(0);
+                  sdram_a(10) <= '1';                                                   -- precharge all banks
+                  timer_cmd   <= C_TIME_RP - 1;
+                  state       <= PRECHARGE_ST;
+               end if;
 
             when READ_ST =>
-               if timer_cmd = C_TIME_QMD + 2 then
+               if timer_cmd >= C_TIME_QMD + 2 and
+                  timer_cmd <= C_TIME_QMD + 1 + avm_burstcount then
                   sdram_dqmh <= '0';
                   sdram_dqml <= '0';
                end if;
-               if timer_cmd = 0 then
+               if timer_cmd + 1 <= avm_burstcount then
                   avm_readdata_o      <= sdram_dq_in;
                   avm_readdatavalid_o <= '1';
-                  sdram_cs_n          <= '0';
-                  sdram_ras_n         <= C_PRECHARGE_BANK(2);
-                  sdram_cas_n         <= C_PRECHARGE_BANK(1);
-                  sdram_we_n          <= C_PRECHARGE_BANK(0);
-                  sdram_a(10)         <= '1';                           -- precharge all banks
-                  timer_cmd           <= C_TIME_RP - 1;
-                  state               <= PRECHARGE_ST;
+               end if;
+               if timer_cmd = C_TIME_CAC + 1 then
+                  sdram_cs_n  <= '0';
+                  sdram_ras_n <= C_BURST_STOP(2);
+                  sdram_cas_n <= C_BURST_STOP(1);
+                  sdram_we_n  <= C_BURST_STOP(0);
+               end if;
+               if timer_cmd = 0 then
+                  sdram_cs_n  <= '0';
+                  sdram_ras_n <= C_PRECHARGE_BANK(2);
+                  sdram_cas_n <= C_PRECHARGE_BANK(1);
+                  sdram_we_n  <= C_PRECHARGE_BANK(0);
+                  sdram_a(10) <= '1';                                                   -- precharge all banks
+                  timer_cmd   <= C_TIME_RP - 1;
+                  state       <= PRECHARGE_ST;
                end if;
 
             when PRECHARGE_ST =>

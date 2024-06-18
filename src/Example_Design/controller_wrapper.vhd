@@ -21,8 +21,8 @@ entity controller_wrapper is
       ctrl_stat_total_i    : in    std_logic_vector(31 downto 0);
       ctrl_stat_error_i    : in    std_logic_vector(31 downto 0);
       ctrl_stat_err_addr_i : in    std_logic_vector(31 downto 0);
-      ctrl_stat_err_exp_i  : in    std_logic_vector(31 downto 0);
-      ctrl_stat_err_read_i : in    std_logic_vector(31 downto 0);
+      ctrl_stat_err_exp_i  : in    std_logic_vector(63 downto 0);
+      ctrl_stat_err_read_i : in    std_logic_vector(63 downto 0);
       -- Connect to mega65_wrapper
       ctrl_key_valid_i     : in    std_logic;
       ctrl_key_ready_o     : out   std_logic;
@@ -57,7 +57,7 @@ architecture synthesis of controller_wrapper is
    signal   ctrl_active_d         : std_logic;
    signal   ctrl_result_valid     : std_logic;
    signal   ctrl_result_ready     : std_logic;
-   signal   ctrl_result_data      : std_logic_vector(735 downto 0);
+   signal   ctrl_result_data      : std_logic_vector(1023 downto 0);
    signal   ctrl_start_ser_valid  : std_logic;
    signal   ctrl_start_ser_ready  : std_logic;
    signal   ctrl_start_ser_data   : std_logic_vector(7 downto 0);
@@ -68,7 +68,7 @@ architecture synthesis of controller_wrapper is
    constant C_POS_X : natural                  := 10;
    constant C_POS_Y : natural                  := 10;
 
-   signal   video_result_data : std_logic_vector(735 downto 0);
+   signal   video_result_data : std_logic_vector(1023 downto 0);
 
    -- Convert ASCII string to std_logic_vector
 
@@ -95,7 +95,7 @@ architecture synthesis of controller_wrapper is
    begin
       --
       for i in arg'length / 4 - 1 downto 0 loop
-         val_v := to_integer(arg(4 * i + 3 downto 4 * i));
+         val_v := to_integer(arg(arg'right + 4 * i + 3 downto arg'right + 4 * i));
          if val_v < 10 then
             res_v(8 * i + 7 downto 8 * i) := to_stdlogicvector(val_v + character'pos('0'), 8);
          else
@@ -212,8 +212,10 @@ begin
    ctrl_result_data <= str2slv("TOTAL:  ") & hexify(ctrl_stat_total_i) & X"0D0A" &
                        str2slv("ERRORS: ") & hexify(ctrl_stat_error_i) & X"0D0A" &
                        str2slv("ADDR:   ") & hexify(ctrl_stat_err_addr_i) & X"0D0A" &
-                       str2slv("EXP:    ") & hexify(ctrl_stat_err_exp_i) & X"0D0A" &
-                       str2slv("READ:   ") & hexify(ctrl_stat_err_read_i) & X"0D0A" &
+                       str2slv("EXP_HI: ") & hexify(ctrl_stat_err_exp_i(63 downto 32)) & X"0D0A" &
+                       str2slv("EXP_LO: ") & hexify(ctrl_stat_err_exp_i(31 downto 0)) & X"0D0A" &
+                       str2slv("READ_HI:") & hexify(ctrl_stat_err_read_i(63 downto 32)) & X"0D0A" &
+                       str2slv("READ_LO:") & hexify(ctrl_stat_err_read_i(31 downto 0)) & X"0D0A" &
                        X"0D0A";
 
 
@@ -289,7 +291,7 @@ begin
 
    video_proc : process (video_clk_i)
       variable col_v   : natural range 0 to 15;
-      variable row_v   : natural range 0 to 4;
+      variable row_v   : natural range 0 to 6;
       variable index_v : natural range 0 to ctrl_result_data'length / 8 - 1;
    begin
       if rising_edge(video_clk_i) then
@@ -298,7 +300,7 @@ begin
          if video_pos_x_i >= C_POS_X and video_pos_x_i < C_POS_X + 16 and
             video_pos_y_i >= C_POS_Y and video_pos_y_i < C_POS_Y + 5 then
             col_v        := 15 - to_integer(video_pos_x_i - C_POS_X);
-            row_v        := 4 - to_integer(video_pos_y_i - C_POS_Y);
+            row_v        := 6 - to_integer(video_pos_y_i - C_POS_Y);
             index_v      := row_v * 18 + col_v + 4;
             video_char_o <= video_result_data(index_v * 8 + 7 downto index_v * 8);
          end if;

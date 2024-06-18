@@ -24,8 +24,8 @@ entity core_wrapper is
       stat_total_o    : out   std_logic_vector(31 downto 0);
       stat_error_o    : out   std_logic_vector(31 downto 0);
       stat_err_addr_o : out   std_logic_vector(31 downto 0);
-      stat_err_exp_o  : out   std_logic_vector(31 downto 0);
-      stat_err_read_o : out   std_logic_vector(31 downto 0);
+      stat_err_exp_o  : out   std_logic_vector(63 downto 0);
+      stat_err_read_o : out   std_logic_vector(63 downto 0);
 
       -- SDRAM device interface
       sdram_clk_o     : out   std_logic;
@@ -100,8 +100,8 @@ begin
       ); -- traffic_gen_inst
 
    stat_err_addr_o(31 downto G_SYS_ADDRESS_SIZE) <= (others => '0');
-   stat_err_exp_o(31 downto G_DATA_SIZE)         <= (others => '0');
-   stat_err_read_o(31 downto G_DATA_SIZE)        <= (others => '0');
+   stat_err_exp_o(63 downto G_DATA_SIZE)         <= (others => '0');
+   stat_err_read_o(63 downto G_DATA_SIZE)        <= (others => '0');
 
 
    decrease_gen : if G_DATA_SIZE > 16 generate
@@ -110,7 +110,7 @@ begin
          generic map (
             G_SLAVE_ADDRESS_SIZE  => G_ADDRESS_SIZE,
             G_SLAVE_DATA_SIZE     => G_DATA_SIZE,
-            G_MASTER_ADDRESS_SIZE => 22,
+            G_MASTER_ADDRESS_SIZE => 25,
             G_MASTER_DATA_SIZE    => 16
          )
          port map (
@@ -127,7 +127,7 @@ begin
             s_avm_waitrequest_o   => avm_waitrequest,
             m_avm_write_o         => dec_write,
             m_avm_read_o          => dec_read,
-            m_avm_address_o       => dec_address(21 downto 0),
+            m_avm_address_o       => dec_address(24 downto 0),
             m_avm_writedata_o     => dec_writedata,
             m_avm_byteenable_o    => dec_byteenable,
             m_avm_burstcount_o    => dec_burstcount,

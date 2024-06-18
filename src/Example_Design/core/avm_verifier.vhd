@@ -77,7 +77,9 @@ begin
             reading    <= '1';
          end if;
          if reading = '1' then
-            read_count <= read_count + 1;
+            if read_count < 1023 then
+               read_count <= read_count + 1;
+            end if;
          end if;
          if avm_readdatavalid_i = '1' then
             reading <= '0';

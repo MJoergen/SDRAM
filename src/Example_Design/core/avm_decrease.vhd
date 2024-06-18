@@ -66,7 +66,11 @@ begin
    assert G_SLAVE_DATA_SIZE = C_RATIO * G_MASTER_DATA_SIZE
       severity failure;
    assert G_SLAVE_DATA_SIZE * (2 ** G_SLAVE_ADDRESS_SIZE) = G_MASTER_DATA_SIZE * (2 ** G_MASTER_ADDRESS_SIZE)
-      severity failure;
+      report "G_SLAVE_DATA_SIZE=" & to_string(G_SLAVE_DATA_SIZE) &
+           ", G_SLAVE_ADDRESS_SIZE=" & to_string(G_SLAVE_ADDRESS_SIZE) &
+           ", G_MASTER_DATA_SIZE=" & to_string(G_MASTER_DATA_SIZE) &
+           ", G_MASTER_ADDRESS_SIZE=" & to_string(G_MASTER_ADDRESS_SIZE)
+         severity failure;
 
    fsm_proc : process (clk_i)
    begin

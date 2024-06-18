@@ -41,7 +41,7 @@ architecture synthesis of avm_master3 is
 
    -- Combinatorial signals
    signal   rand_update_s : std_logic;
-   signal   random_s      : std_logic_vector(63 downto 0);
+   signal   random_s      : std_logic_vector(127 downto 0);
 
    subtype  R_ADDRESS    is natural range G_ADDRESS_SIZE - 1 downto 0;
    subtype  R_DATA       is natural range G_DATA_SIZE + R_ADDRESS'left downto R_ADDRESS'left + 1;
@@ -96,18 +96,21 @@ begin
             when IDLE_ST =>
                if start_i = '1' then
                   report "Starting";
-                  wait_o             <= '1';
-                  m_avm_write_o      <= '1';
-                  m_avm_read_o       <= '0';
-                  m_avm_address_o    <= (others => '0');
-                  m_avm_writedata_o  <= (others => '1');
-                  m_avm_byteenable_o <= (others => '1');
-                  m_avm_burstcount_o <= X"01";
-                  count              <= (others => '0');
-                  state              <= INIT_ST;
 
                   if C_SIM then
-                     state <= WORKING_ST;
+                     wait_o        <= '1';
+                     rand_update_s <= '1';
+                     state         <= WORKING_ST;
+                  else
+                     wait_o             <= '1';
+                     m_avm_write_o      <= '1';
+                     m_avm_read_o       <= '0';
+                     m_avm_address_o    <= (others => '0');
+                     m_avm_writedata_o  <= (others => '1');
+                     m_avm_byteenable_o <= (others => '1');
+                     m_avm_burstcount_o <= X"01";
+                     count              <= (others => '0');
+                     state              <= INIT_ST;
                   end if;
                end if;
 
