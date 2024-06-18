@@ -178,6 +178,8 @@ architecture synthesis of sdram is
    signal   timer_cmd     : natural range 0 to C_TIME_INIT_POWER_ON - 1;
    signal   timer_refresh : natural range 0 to C_TIME_REFRESH - 1;
 
+   signal   avm_address_debug : std_logic_vector(24 downto 2);
+
    signal   avm_write      : std_logic;
    signal   avm_read       : std_logic;
    signal   avm_address    : std_logic_vector(31 downto 0);
@@ -214,46 +216,82 @@ architecture synthesis of sdram is
    attribute dont_touch : string;
    attribute dont_touch of sdram_dq_oe_n : signal is "true";
 
+   attribute IOB : string;
+   attribute IOB of sdram_a_o       : signal is "TRUE";
+   attribute IOB of sdram_ba_o      : signal is "TRUE";
+   attribute IOB of sdram_cas_n_o   : signal is "TRUE";
+   attribute IOB of sdram_cs_n_o    : signal is "TRUE";
+   attribute IOB of sdram_dqmh_o    : signal is "TRUE";
+   attribute IOB of sdram_dqml_o    : signal is "TRUE";
+   attribute IOB of sdram_dq_oe_n_o : signal is "TRUE";
+   attribute IOB of sdram_dq_out_o  : signal is "TRUE";
+   attribute IOB of sdram_ras_n_o   : signal is "TRUE";
+   attribute IOB of sdram_we_n_o    : signal is "TRUE";
+   attribute IOB of sdram_dq_in     : signal is "TRUE";
+
+   constant C_OUTPUT_REG : boolean := false;
+
 --   attribute mark_debug : string;
 --   attribute mark_debug of sdram_a       : signal is "true";
 --   attribute mark_debug of sdram_ba      : signal is "true";
 --   attribute mark_debug of sdram_cas_n   : signal is "true";
 --   attribute mark_debug of sdram_cke     : signal is "true";
 --   attribute mark_debug of sdram_cs_n    : signal is "true";
+--   attribute mark_debug of sdram_dq_in   : signal is "true";
 --   attribute mark_debug of sdram_dqmh    : signal is "true";
 --   attribute mark_debug of sdram_dqml    : signal is "true";
 --   attribute mark_debug of sdram_dq_oe_n : signal is "true";
 --   attribute mark_debug of sdram_dq_out  : signal is "true";
 --   attribute mark_debug of sdram_ras_n   : signal is "true";
 --   attribute mark_debug of sdram_we_n    : signal is "true";
---   attribute mark_debug of sdram_dq_in   : signal is "true";
 
---   attribute mark_debug of avm_waitrequest_o   : signal is "true";
---   attribute mark_debug of avm_write_i         : signal is "true";
---   attribute mark_debug of avm_read_i          : signal is "true";
---   attribute mark_debug of avm_address_i       : signal is "true";
---   attribute mark_debug of avm_writedata_i     : signal is "true";
+--   attribute mark_debug of avm_address_debug   : signal is "true";
 --   attribute mark_debug of avm_byteenable_i    : signal is "true";
 --   attribute mark_debug of avm_readdata_o      : signal is "true";
 --   attribute mark_debug of avm_readdatavalid_o : signal is "true";
+--   attribute mark_debug of avm_read_i          : signal is "true";
+--   attribute mark_debug of avm_waitrequest_o   : signal is "true";
+--   attribute mark_debug of avm_writedata_i     : signal is "true";
+--   attribute mark_debug of avm_write_i         : signal is "true";
 
 begin
+
+   avm_address_debug <= avm_address_i(24 downto 2);
 
    avm_waitrequest_o <= '0' when state = IDLE_ST and timer_refresh /= 0 else
                         '0' when avm_write = '1' and avm_burstcount > 1 else
                         '1';
 
-   sdram_a_o         <= sdram_a;
-   sdram_ba_o        <= sdram_ba;
-   sdram_cas_n_o     <= sdram_cas_n;
-   sdram_cke_o       <= sdram_cke;
-   sdram_cs_n_o      <= sdram_cs_n;
-   sdram_dqmh_o      <= sdram_dqmh;
-   sdram_dqml_o      <= sdram_dqml;
-   sdram_dq_oe_n_o   <= sdram_dq_oe_n;
-   sdram_dq_out_o    <= sdram_dq_out;
-   sdram_ras_n_o     <= sdram_ras_n;
-   sdram_we_n_o      <= sdram_we_n;
+   output_reg_gen : if C_OUTPUT_REG generate
+      process (clk_i)
+      begin
+         if rising_edge(clk_i) then
+            sdram_a_o         <= sdram_a;
+            sdram_ba_o        <= sdram_ba;
+            sdram_cas_n_o     <= sdram_cas_n;
+            sdram_cke_o       <= sdram_cke;
+            sdram_cs_n_o      <= sdram_cs_n;
+            sdram_dqmh_o      <= sdram_dqmh;
+            sdram_dqml_o      <= sdram_dqml;
+            sdram_dq_oe_n_o   <= sdram_dq_oe_n;
+            sdram_dq_out_o    <= sdram_dq_out;
+            sdram_ras_n_o     <= sdram_ras_n;
+            sdram_we_n_o      <= sdram_we_n;
+         end if;
+      end process;
+   else generate
+      sdram_a_o         <= sdram_a;
+      sdram_ba_o        <= sdram_ba;
+      sdram_cas_n_o     <= sdram_cas_n;
+      sdram_cke_o       <= sdram_cke;
+      sdram_cs_n_o      <= sdram_cs_n;
+      sdram_dqmh_o      <= sdram_dqmh;
+      sdram_dqml_o      <= sdram_dqml;
+      sdram_dq_oe_n_o   <= sdram_dq_oe_n;
+      sdram_dq_out_o    <= sdram_dq_out;
+      sdram_ras_n_o     <= sdram_ras_n;
+      sdram_we_n_o      <= sdram_we_n;
+   end generate;
 
    axi_fifo_small_inst : entity work.axi_fifo_small
       generic map (
@@ -403,7 +441,11 @@ begin
                      sdram_a(9 downto 0) <= avm_address(9 downto 0);                    -- column address
                      sdram_a(10)         <= '0';                                        -- no automatic precharge
                      sdram_ba            <= avm_address(24 downto 23);                  -- bank address
-                     timer_cmd           <= C_TIME_CAC + to_integer(avm_burstcount);
+                     if C_OUTPUT_REG then
+                        timer_cmd           <= C_TIME_CAC + to_integer(avm_burstcount) + 1;
+                     else
+                        timer_cmd           <= C_TIME_CAC + to_integer(avm_burstcount);
+                     end if;
                      state               <= READ_ST;
                   end if;
                   if avm_write = '1' then
@@ -443,10 +485,18 @@ begin
                end if;
 
             when READ_ST =>
-               if timer_cmd >= C_TIME_QMD + 2 and
-                  timer_cmd <= C_TIME_QMD + 1 + avm_burstcount then
-                  sdram_dqmh <= '0';
-                  sdram_dqml <= '0';
+               if C_OUTPUT_REG then
+                  if timer_cmd >= C_TIME_QMD + 3 and
+                     timer_cmd <= C_TIME_QMD + 2 + avm_burstcount then
+                     sdram_dqmh <= '0';
+                     sdram_dqml <= '0';
+                  end if;
+               else
+                  if timer_cmd >= C_TIME_QMD + 2 and
+                     timer_cmd <= C_TIME_QMD + 1 + avm_burstcount then
+                     sdram_dqmh <= '0';
+                     sdram_dqml <= '0';
+                  end if;
                end if;
                if timer_cmd + 1 <= avm_burstcount then
                   avm_readdata_o      <= sdram_dq_in;

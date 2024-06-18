@@ -55,7 +55,7 @@ $(TOP).tcl: Makefile
 	echo "opt_design" >> $@
 	echo "place_design" >> $@
 	echo "phys_opt_design" >> $@
-	echo "route_design" >> $@
+	echo "route_design -directive Explore" >> $@
 	echo "write_checkpoint -force $(TOP).dcp" >> $@
 	echo "write_bitstream -force $(TOP).bit" >> $@
 	echo "exit" >> $@

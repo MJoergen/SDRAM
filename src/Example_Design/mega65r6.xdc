@@ -63,20 +63,6 @@ set_property -dict {PACKAGE_PIN T5   IOSTANDARD LVCMOS33} [get_ports {sdram_ras_
 set_property -dict {PACKAGE_PIN G1   IOSTANDARD LVCMOS33} [get_ports {sdram_we_n_o}];           # SDRAM_WE#
 set_property -dict {PULLUP FALSE  SLEW FAST  DRIVE 16}    [get_ports {sdram_*}];
 
-set_property IOB TRUE [get_cells {core_wrapper_inst/sdram_inst/sdram_a_reg[*]}];
-set_property IOB TRUE [get_cells {core_wrapper_inst/sdram_inst/sdram_ba_reg[*]}];
-set_property IOB TRUE [get_cells {core_wrapper_inst/sdram_inst/sdram_cas_n_reg}];
-# The CKE signal is hardwired to 1.
-#set_property IOB TRUE [get_cells {core_wrapper_inst/sdram_inst/sdram_cke_reg}];
-set_property IOB TRUE [get_cells {core_wrapper_inst/sdram_inst/sdram_cs_n_reg}];
-set_property IOB TRUE [get_cells {core_wrapper_inst/sdram_inst/sdram_dq_in_reg[*]}];
-set_property IOB TRUE [get_cells {core_wrapper_inst/sdram_inst/sdram_dqmh_reg}];
-set_property IOB TRUE [get_cells {core_wrapper_inst/sdram_inst/sdram_dqml_reg}];
-set_property IOB TRUE [get_cells {core_wrapper_inst/sdram_inst/sdram_dq_oe_n_reg[*]}];
-set_property IOB TRUE [get_cells {core_wrapper_inst/sdram_inst/sdram_dq_out_reg[*]}];
-set_property IOB TRUE [get_cells {core_wrapper_inst/sdram_inst/sdram_ras_n_reg}];
-set_property IOB TRUE [get_cells {core_wrapper_inst/sdram_inst/sdram_we_n_reg}];
-
 # USB-RS232 Interface
 set_property -dict {PACKAGE_PIN L14  IOSTANDARD LVCMOS33} [get_ports {uart_rx_i}];              # DBG_UART_RX
 set_property -dict {PACKAGE_PIN L13  IOSTANDARD LVCMOS33} [get_ports {uart_tx_o}];              # DBG_UART_TX
