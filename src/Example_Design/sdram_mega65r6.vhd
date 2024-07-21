@@ -8,7 +8,7 @@ library ieee;
 
 entity sdram_mega65r6 is
    generic (
---      G_SYS_ADDRESS_SIZE : integer := 19;
+      --      G_SYS_ADDRESS_SIZE : integer := 19;
       G_SYS_ADDRESS_SIZE : integer := 17;
       G_FONT_PATH        : string  := ""
    );
@@ -56,8 +56,8 @@ architecture synthesis of sdram_mega65r6 is
    constant C_SYS_ADDRESS_SIZE : integer := G_SYS_ADDRESS_SIZE;
    -- The SDRAM has 32M addresses and 16 data bits,
    -- i.e. a total of 512 Mbits = 64 MBytes.
---   constant C_ADDRESS_SIZE     : integer := 25;
---   constant C_DATA_SIZE        : integer := 16;
+   --   constant C_ADDRESS_SIZE     : integer := 25;
+   --   constant C_DATA_SIZE        : integer := 16;
    constant C_ADDRESS_SIZE     : integer := 23;
    constant C_DATA_SIZE        : integer := 64;
 
@@ -129,6 +129,8 @@ begin
          ctrl_key_valid_o     => ctrl_key_valid,
          ctrl_key_ready_i     => ctrl_key_ready,
          ctrl_key_data_o      => ctrl_key_data,
+         ctrl_led_active_i    => ctrl_active,
+         ctrl_led_error_i     => or(ctrl_stat_error),
          ctrl_uart_rx_valid_o => ctrl_uart_rx_valid,
          ctrl_uart_rx_ready_i => ctrl_uart_rx_ready,
          ctrl_uart_rx_data_o  => ctrl_uart_rx_data,

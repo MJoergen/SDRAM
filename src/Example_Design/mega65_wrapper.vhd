@@ -36,6 +36,8 @@ entity mega65_wrapper is
       ctrl_key_valid_o     : out   std_logic;
       ctrl_key_ready_i     : in    std_logic;
       ctrl_key_data_o      : out   std_logic_vector(7 downto 0);
+      ctrl_led_active_i    : in    std_logic;
+      ctrl_led_error_i     : in    std_logic;
       ctrl_uart_rx_valid_o : out   std_logic;
       ctrl_uart_rx_ready_i : in    std_logic;
       ctrl_uart_rx_data_o  : out   std_logic_vector(7 downto 0);
@@ -82,14 +84,16 @@ begin
          G_CTRL_HZ => C_CTRL_HZ
       )
       port map (
-         ctrl_clk_i       => ctrl_clk_o,
-         ctrl_rst_i       => ctrl_rst_o,
-         ctrl_key_valid_o => ctrl_key_valid_o,
-         ctrl_key_ready_i => ctrl_key_ready_i,
-         ctrl_key_data_o  => ctrl_key_data_o,
-         kb_io0_o         => kb_io0_o,
-         kb_io1_o         => kb_io1_o,
-         kb_io2_i         => kb_io2_i
+         ctrl_clk_i        => ctrl_clk_o,
+         ctrl_rst_i        => ctrl_rst_o,
+         ctrl_key_valid_o  => ctrl_key_valid_o,
+         ctrl_key_ready_i  => ctrl_key_ready_i,
+         ctrl_key_data_o   => ctrl_key_data_o,
+         ctrl_led_active_i => ctrl_led_active_i,
+         ctrl_led_error_i  => ctrl_led_error_i,
+         kb_io0_o          => kb_io0_o,
+         kb_io1_o          => kb_io1_o,
+         kb_io2_i          => kb_io2_i
       ); -- keyboard_wrapper_inst
 
 

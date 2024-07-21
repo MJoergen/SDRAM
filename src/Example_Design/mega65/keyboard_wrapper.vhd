@@ -18,16 +18,18 @@ entity keyboard_wrapper is
       G_CTRL_HZ : natural
    );
    port (
-      ctrl_clk_i       : in    std_logic;
-      ctrl_rst_i       : in    std_logic;
-      ctrl_key_ready_i : in    std_logic;
-      ctrl_key_valid_o : out   std_logic;
-      ctrl_key_data_o  : out   std_logic_vector(7 downto 0);
+      ctrl_clk_i        : in    std_logic;
+      ctrl_rst_i        : in    std_logic;
+      ctrl_key_ready_i  : in    std_logic;
+      ctrl_key_valid_o  : out   std_logic;
+      ctrl_key_data_o   : out   std_logic_vector(7 downto 0);
+      ctrl_led_active_i : in    std_logic;
+      ctrl_led_error_i  : in    std_logic;
 
       -- Interface for physical keyboard
-      kb_io0_o         : out   std_logic;
-      kb_io1_o         : out   std_logic;
-      kb_io2_i         : in    std_logic
+      kb_io0_o          : out   std_logic;
+      kb_io1_o          : out   std_logic;
+      kb_io2_i          : in    std_logic
    );
 end entity keyboard_wrapper;
 
@@ -57,14 +59,15 @@ begin
          kio8_o           => kb_io0_o,
          kio9_o           => kb_io1_o,
          kio10_i          => kb_io2_i,
+         powerled_i       => ctrl_led_active_i,
+         flopled_i        => ctrl_led_error_i,
          enable_core_i    => '1',
          key_num_o        => key_num,
          key_pressed_n_o  => key_pressed_n,
-         drive_led_i      => '0',
          qnice_keys_n_o   => open
       ); -- m2m_keyb_inst
 
-   key_data_s <= to_stdlogicvector(character'pos(C_KEYCODE_TO_ASCII(key_num+1)), 8);
+   key_data_s <= to_stdlogicvector(character'pos(C_KEYCODE_TO_ASCII(key_num + 1)), 8);
 
    key_proc : process (ctrl_clk_i)
    begin
