@@ -108,12 +108,12 @@ set_property -dict {PACKAGE_PIN C13  IOSTANDARD LVCMOS33} [get_ports {kb_io2_i}]
 ## Placement constraints
 ################################
 
-## Place KBD close to I/O pins
-#startgroup
-#create_pblock pblock_keyboard
-#resize_pblock pblock_keyboard -add {SLICE_X0Y225:SLICE_X7Y237}
-#add_cells_to_pblock pblock_keyboard [get_cells [list mega65_wrapper_inst/keyboard_inst]]
-#endgroup
+# Place KBD close to I/O pins
+startgroup
+create_pblock pblock_keyboard
+resize_pblock pblock_keyboard -add {SLICE_X0Y225:SLICE_X7Y237}
+add_cells_to_pblock pblock_keyboard [get_cells [list mega65_wrapper_inst/keyboard_wrapper_inst/m2m_keyb_inst]]
+endgroup
 
 
 ################################

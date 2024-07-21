@@ -67,20 +67,21 @@ begin
 
    mega65kbd_to_matrix_inst : entity work.mega65kbd_to_matrix
       port map (
-         ioclock_i        => clk_main_i,
+         ioclock_i         => clk_main_i,
+         clock_frequency_i => clk_main_speed_i,
 
-         flopmotor_i      => '0',
-         flopled_i        => drive_led_i,
-         powerled_i       => '1',
+         flopmotor_i       => '0',
+         flopled_i         => drive_led_i,
+         powerled_i        => '1',
 
-         kio8_o           => kio8_o,
-         kio9_o           => kio9_o,
-         kio10_i          => kio10_i,
+         kio8_o            => kio8_o,
+         kio9_o            => kio9_o,
+         kio10_i           => kio10_i,
 
-         matrix_col_o     => matrix_col,
-         matrix_col_idx_i => matrix_col_idx,
+         matrix_col_o      => matrix_col,
+         matrix_col_idx_i  => matrix_col_idx,
 
-         capslock_out_o   => open
+         capslock_out_o    => open
       ); -- mega65kbd_to_matrix_inst
 
    matrix_to_keynum_inst : entity work.matrix_to_keynum

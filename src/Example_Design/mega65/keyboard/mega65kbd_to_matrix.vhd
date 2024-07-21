@@ -10,68 +10,78 @@ library ieee;
 
 entity mega65kbd_to_matrix is
    port (
-      ioclock_i        : in    std_logic;
+      ioclock_i         : in    std_logic;
+      clock_frequency_i : in    natural;
 
-      flopmotor_i      : in    std_logic;
-      flopled_i        : in    std_logic;
-      powerled_i       : in    std_logic;
+      flopmotor_i       : in    std_logic;
+      flopled_i         : in    std_logic;
+      powerled_i        : in    std_logic;
 
-      kio8_o           : out   std_logic; -- clock to keyboard
-      kio9_o           : out   std_logic; -- data output to keyboard
-      kio10_i          : in    std_logic; -- data input from keyboard
+      kio8_o            : out   std_logic; -- clock to keyboard
+      kio9_o            : out   std_logic; -- data output to keyboard
+      kio10_i           : in    std_logic; -- data input from keyboard
 
-      matrix_col_o     : out   std_logic_vector(7 downto 0);
-      matrix_col_idx_i : in    integer range 0 to 9;
+      matrix_col_o      : out   std_logic_vector(7 downto 0);
+      matrix_col_idx_i  : in    integer range 0 to 9;
 
-      delete_out_o     : out   std_logic;
-      return_out_o     : out   std_logic;
-      fastkey_out_o    : out   std_logic;
+      delete_out_o      : out   std_logic;
+      return_out_o      : out   std_logic;
+      fastkey_out_o     : out   std_logic;
 
       -- RESTORE and capslock are active low
-      restore_o        : out   std_logic;
-      capslock_out_o   : out   std_logic;
+      restore_o         : out   std_logic;
+      capslock_out_o    : out   std_logic;
 
       -- LEFT and UP cursor keys are active HIGH
-      leftkey_o        : out   std_logic;
-      upkey_o          : out   std_logic
+      leftkey_o         : out   std_logic;
+      upkey_o           : out   std_logic
    );
 end entity mega65kbd_to_matrix;
 
 architecture synthesis of mega65kbd_to_matrix is
 
-   signal matrix_col   : std_logic_vector(7 downto 0) := (others => '1');
-   signal restore      : std_logic                    := '1';
-   signal capslock_out : std_logic                    := '1';
-   signal leftkey      : std_logic                    := '0';
-   signal upkey        : std_logic                    := '0';
+   signal matrix_col   : std_logic_vector(7 downto 0)     := (others => '1');
+   signal restore      : std_logic                        := '1';
+   signal capslock_out : std_logic                        := '1';
+   signal leftkey      : std_logic                        := '0';
+   signal upkey        : std_logic                        := '0';
 
-   signal matrix_ram_offset : integer range 0 to 15   := 0;
+   signal matrix_ram_offset : integer range 0 to 15       := 0;
    signal keyram_wea        : std_logic_vector(7 downto 0);
    signal keyram_dia        : std_logic_vector(7 downto 0);
    signal matrix_dia        : std_logic_vector(7 downto 0);
 
-   signal enabled : std_logic                         := '0';
+   signal enabled : std_logic                             := '0';
 
-   signal clock_divider : integer range 0 to 255      := 0;
-   signal kbd_clock     : std_logic                   := '0';
-   signal phase         : integer range 0 to 255      := 0;
-   signal sync_pulse    : std_logic                   := '0';
+   signal clock_divider        : integer range 0 to 65535 := 0;
+   signal clock_divider_target : integer range 0 to 65535;
 
-   signal counter : unsigned(26 downto 0)             := to_unsigned(0, 27);
+   signal kbd_clock  : std_logic                          := '0';
+   signal phase      : integer range 0 to 255             := 0;
+   signal sync_pulse : std_logic                          := '0';
+
+   signal counter : unsigned(26 downto 0)                 := to_unsigned(0, 27);
 
    signal output_vector : std_logic_vector(127 downto 0);
 
-   signal deletekey : std_logic                       := '1';
-   signal returnkey : std_logic                       := '1';
-   signal fastkey   : std_logic                       := '1';
+   signal deletekey : std_logic                           := '1';
+   signal returnkey : std_logic                           := '1';
+   signal fastkey   : std_logic                           := '1';
 
 begin  -- behavioural
 
-   matrix_col_o   <= matrix_col;
-   restore_o      <= restore;
-   capslock_out_o <= capslock_out;
-   leftkey_o      <= leftkey;
-   upkey_o        <= upkey;
+   -- @TODO as of December 2022 (by sy2002): We need to find a smarter solution. This only works well
+   -- as long as we only have one constant core frequency; otherwise a large combinatorial net will be
+   -- created and we would need to add false-paths to the XDC (see also lines 90+ in matrix_to_keynum.vhd)
+   -- In the original MEGA65 code, the value is 64 for a 40 MHz clock, i.e. (40000000/64/2) 312.500 Hz.
+   -- Let's make sure approximate this value well enough.
+   clock_divider_target <= clock_frequency_i / 2 / 312500;
+
+   matrix_col_o         <= matrix_col;
+   restore_o            <= restore;
+   capslock_out_o       <= capslock_out;
+   leftkey_o            <= leftkey;
+   upkey_o              <= upkey;
 
    kb_matrix_ram_inst : entity work.kb_matrix_ram
       port map (
@@ -107,9 +117,8 @@ begin  -- behavioural
          keyram_write_enable_v := x"00";
          keyram_offset_v       := 0;
 
-         -- modified by sy2002 in December 2020:
-         -- original value for the MEGA65 @ 40 MHz was 64
-         if clock_divider /= 45 then
+         -- modified by sy2002 in December 2022
+         if clock_divider /= clock_divider_target then
             clock_divider <= clock_divider + 1;
          else
             clock_divider <= 0;
