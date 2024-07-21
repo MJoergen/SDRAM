@@ -16,14 +16,14 @@ end entity font;
 
 architecture synthesis of font is
 
-   -- a single character bitmap is defined by 8x8 = 64 bits.
+   -- A single character bitmap is defined by 8x8 = 64 bits.
    subtype  BITMAP_TYPE is std_logic_vector(63 downto 0);
 
-   -- the entire font is defined by an array bitmaps, one for each character.
+   -- The entire font is defined by an array bitmaps, one for each character.
    type     bitmap_vector_type is array (0 to 255) of BITMAP_TYPE;
 
 
-   -- this reads the rom contents from a text file
+   -- This reads the ROM contents from a text file
 
    impure function init_ram_from_file (
       ram_file_name : in string

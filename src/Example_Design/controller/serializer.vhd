@@ -65,6 +65,7 @@ begin
                if m_ready_i = '1' then
                   if count > 0 then
                      data(G_DATA_SIZE_IN - 1 downto G_DATA_SIZE_OUT) <= data(G_DATA_SIZE_IN - G_DATA_SIZE_OUT - 1 downto 0);
+                     data(G_DATA_SIZE_OUT - 1 downto 0)              <= (others => '0');
                      m_valid_o                                       <= '1';
                      count                                           <= count - 1;
                   else

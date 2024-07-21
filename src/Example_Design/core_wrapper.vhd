@@ -47,6 +47,7 @@ end entity core_wrapper;
 architecture synthesis of core_wrapper is
 
    -- Avalon Memory Map interface to SDRAM Controller
+   signal avm_waitrequest   : std_logic;
    signal avm_write         : std_logic;
    signal avm_read          : std_logic;
    signal avm_address       : std_logic_vector(31 downto 0) := (others => '0');
@@ -55,8 +56,8 @@ architecture synthesis of core_wrapper is
    signal avm_burstcount    : std_logic_vector(7 downto 0);
    signal avm_readdata      : std_logic_vector(G_DATA_SIZE - 1 downto 0);
    signal avm_readdatavalid : std_logic;
-   signal avm_waitrequest   : std_logic;
 
+   signal dec_waitrequest   : std_logic;
    signal dec_write         : std_logic;
    signal dec_read          : std_logic;
    signal dec_address       : std_logic_vector(31 downto 0) := (others => '0');
@@ -65,7 +66,6 @@ architecture synthesis of core_wrapper is
    signal dec_burstcount    : std_logic_vector(7 downto 0);
    signal dec_readdata      : std_logic_vector(15 downto 0);
    signal dec_readdatavalid : std_logic;
-   signal dec_waitrequest   : std_logic;
 
 begin
 
@@ -116,6 +116,7 @@ begin
          port map (
             clk_i                 => clk_i,
             rst_i                 => rst_i,
+            s_avm_waitrequest_o   => avm_waitrequest,
             s_avm_write_i         => avm_write,
             s_avm_read_i          => avm_read,
             s_avm_address_i       => avm_address(G_ADDRESS_SIZE - 1 downto 0),
@@ -124,7 +125,7 @@ begin
             s_avm_burstcount_i    => avm_burstcount,
             s_avm_readdata_o      => avm_readdata,
             s_avm_readdatavalid_o => avm_readdatavalid,
-            s_avm_waitrequest_o   => avm_waitrequest,
+            m_avm_waitrequest_i   => dec_waitrequest,
             m_avm_write_o         => dec_write,
             m_avm_read_o          => dec_read,
             m_avm_address_o       => dec_address(24 downto 0),
@@ -132,11 +133,11 @@ begin
             m_avm_byteenable_o    => dec_byteenable,
             m_avm_burstcount_o    => dec_burstcount,
             m_avm_readdata_i      => dec_readdata,
-            m_avm_readdatavalid_i => dec_readdatavalid,
-            m_avm_waitrequest_i   => dec_waitrequest
+            m_avm_readdatavalid_i => dec_readdatavalid
          ); -- avm_decrease_inst
 
    else generate
+      avm_waitrequest   <= dec_waitrequest;
       dec_write         <= avm_write;
       dec_read          <= avm_read;
       dec_address       <= avm_address;
@@ -145,7 +146,6 @@ begin
       dec_burstcount    <= avm_burstcount;
       avm_readdata      <= dec_readdata;
       avm_readdatavalid <= dec_readdatavalid;
-      avm_waitrequest   <= dec_waitrequest;
    end generate decrease_gen;
 
 

@@ -56,7 +56,7 @@ architecture synthesis of avm_master3 is
    type     state_type is (IDLE_ST, INIT_ST, WORKING_ST, READING_ST, DONE_ST);
 
    signal   state : state_type     := IDLE_ST;
-   signal   count : std_logic_vector(G_ADDRESS_SIZE + 2 downto 0);
+   signal   count : std_logic_vector(G_ADDRESS_SIZE + 4 downto 0);
 
    constant C_WAIT_MAX : natural   := 1000;
    signal   waiting    : natural range 0 to C_WAIT_MAX;
