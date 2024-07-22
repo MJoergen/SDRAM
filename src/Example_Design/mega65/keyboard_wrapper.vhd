@@ -67,7 +67,8 @@ begin
          qnice_keys_n_o   => open
       ); -- m2m_keyb_inst
 
-   key_data_s <= to_stdlogicvector(character'pos(C_KEYCODE_TO_ASCII(key_num + 1)), 8);
+   key_data_s <= X"0D" when key_num = 77 else -- special case for ENTER key
+                to_stdlogicvector(character'pos(C_KEYCODE_TO_ASCII(key_num + 1)), 8);
 
    key_proc : process (ctrl_clk_i)
    begin

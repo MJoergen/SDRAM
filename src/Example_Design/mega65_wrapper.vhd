@@ -30,6 +30,10 @@ entity mega65_wrapper is
       vdac_blank_n_o       : out   std_logic;
       vdac_psave_n_o       : out   std_logic;
       vdac_sync_n_o        : out   std_logic;
+      hdmi_data_p_o        : out   std_logic_vector(2 downto 0);
+      hdmi_data_n_o        : out   std_logic_vector(2 downto 0);
+      hdmi_clk_p_o         : out   std_logic;
+      hdmi_clk_n_o         : out   std_logic;
       -- Connection to design
       ctrl_clk_o           : out   std_logic;
       ctrl_rst_o           : out   std_logic;
@@ -58,6 +62,8 @@ architecture synthesis of mega65_wrapper is
    constant C_CTRL_HZ : natural := 166_000_000;
    constant C_UART_HZ : natural := 115_200;
 
+   signal   hdmi_clk : std_logic;
+
 begin
 
    --------------------------------------------------------------------------
@@ -71,7 +77,8 @@ begin
          ctrl_clk_o  => ctrl_clk_o, -- SDRAM controller
          ctrl_rst_o  => ctrl_rst_o,
          video_clk_o => video_clk_o,
-         video_rst_o => video_rst_o
+         video_rst_o => video_rst_o,
+         hdmi_clk_o  => hdmi_clk
       ); -- clk_inst
 
 
@@ -134,6 +141,7 @@ begin
          video_pos_y_o  => video_pos_y_o,
          video_char_i   => video_char_i,
          video_colors_i => video_colors_i,
+         hdmi_clk_i     => hdmi_clk,
          vga_red_o      => vga_red_o,
          vga_green_o    => vga_green_o,
          vga_blue_o     => vga_blue_o,
@@ -142,7 +150,11 @@ begin
          vdac_clk_o     => vdac_clk_o,
          vdac_blank_n_o => vdac_blank_n_o,
          vdac_psave_n_o => vdac_psave_n_o,
-         vdac_sync_n_o  => vdac_sync_n_o
+         vdac_sync_n_o  => vdac_sync_n_o,
+         hdmi_data_p_o  => hdmi_data_p_o,
+         hdmi_data_n_o  => hdmi_data_n_o,
+         hdmi_clk_p_o   => hdmi_clk_p_o,
+         hdmi_clk_n_o   => hdmi_clk_n_o
       ); -- video_wrapper_inst
 
 end architecture synthesis;

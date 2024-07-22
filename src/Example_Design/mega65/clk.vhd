@@ -19,7 +19,8 @@ entity clk is
       ctrl_clk_o  : out   std_logic; -- 166 MHz
       ctrl_rst_o  : out   std_logic; -- Synchronous, asserted high
       video_clk_o : out   std_logic; -- 74.25 MHz
-      video_rst_o : out   std_logic  -- Synchronous, asserted high
+      video_rst_o : out   std_logic; -- Synchronous, asserted high
+      hdmi_clk_o  : out   std_logic  -- 371.25 MHz
    );
 end entity clk;
 
@@ -30,12 +31,13 @@ architecture synthesis of clk is
    signal ctrl_clk_locked  : std_logic;
    signal video_clk_fb     : std_logic;
    signal video_clk_mmcm   : std_logic;
+   signal hdmi_clk_mmcm    : std_logic;
    signal video_clk_locked : std_logic;
 
 begin
 
    -------------------------------------
-   -- Generate SDRAM clock
+   -- Generate controller clock
    -------------------------------------
 
    plle2_base_inst : component plle2_base
@@ -58,7 +60,7 @@ begin
          clkout0  => ctrl_clk_mmcm,
          locked   => ctrl_clk_locked,
          pwrdwn   => '0',
-         rst      => '0'
+         rst      => sys_rst_i
       ); -- plle2_base_inst
 
 
@@ -78,16 +80,20 @@ begin
          CLKFBOUT_PHASE     => 0.000,
          CLKOUT0_DIVIDE_F   => 10.000, -- 74.25 MHz
          CLKOUT0_PHASE      => 0.000,
-         CLKOUT0_DUTY_CYCLE => 0.500
+         CLKOUT0_DUTY_CYCLE => 0.500,
+         CLKOUT1_DIVIDE     => 2,      -- 371.25 MHz
+         CLKOUT1_PHASE      => 0.000,
+         CLKOUT1_DUTY_CYCLE => 0.500
       )
       port map (
          clkfbin  => video_clk_fb,
          clkfbout => video_clk_fb,
          clkin1   => sys_clk_i,
          clkout0  => video_clk_mmcm,
+         clkout1  => hdmi_clk_mmcm,
          locked   => video_clk_locked,
          pwrdwn   => '0',
-         rst      => '0'
+         rst      => sys_rst_i
       ); -- mmcme2_base_inst
 
 
@@ -107,6 +113,12 @@ begin
          o => video_clk_o
       ); -- bufg_video_inst
 
+   bufg_hdmi_inst : component bufg
+      port map (
+         i => hdmi_clk_mmcm,
+         o => hdmi_clk_o
+      ); -- bufg_hdmi_inst
+
 
    -------------------------------------
    -- Reset generation
@@ -117,7 +129,7 @@ begin
          INIT_SYNC_FF => 1 -- Enable simulation init values
       )
       port map (
-         src_rst  => sys_rst_i or not ctrl_clk_locked,
+         src_rst  => not ctrl_clk_locked,
          dest_clk => ctrl_clk_o,
          dest_rst => ctrl_rst_o
       ); -- xpm_cdc_sync_rst_ctrl_inst
@@ -127,7 +139,7 @@ begin
          INIT_SYNC_FF => 1 -- Enable simulation init values
       )
       port map (
-         src_rst  => sys_rst_i or not video_clk_locked,
+         src_rst  => not video_clk_locked,
          dest_clk => video_clk_o,
          dest_rst => video_rst_o
       ); -- xpm_cdc_sync_rst_video_inst

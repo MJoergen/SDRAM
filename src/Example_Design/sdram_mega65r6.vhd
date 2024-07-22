@@ -47,7 +47,13 @@ entity sdram_mega65r6 is
       vdac_clk_o     : out   std_logic;
       vdac_blank_n_o : out   std_logic;
       vdac_psave_n_o : out   std_logic;
-      vdac_sync_n_o  : out   std_logic
+      vdac_sync_n_o  : out   std_logic;
+
+      -- MEGA65 Digital Video (HDMI)
+      hdmi_data_p_o  : out   std_logic_vector(2 downto 0);
+      hdmi_data_n_o  : out   std_logic_vector(2 downto 0);
+      hdmi_clk_p_o   : out   std_logic;
+      hdmi_clk_n_o   : out   std_logic
    );
 end entity sdram_mega65r6;
 
@@ -65,6 +71,7 @@ architecture synthesis of sdram_mega65r6 is
    signal   ctrl_clk : std_logic;                          -- SDRAM controller clock
    signal   ctrl_rst : std_logic;                          -- SDRAM controller reset (active high)
 
+   -- Interface to MEGA65 keyboard and UART
    signal   ctrl_key_valid     : std_logic;
    signal   ctrl_key_ready     : std_logic;
    signal   ctrl_key_data      : std_logic_vector(7 downto 0);
@@ -75,6 +82,14 @@ architecture synthesis of sdram_mega65r6 is
    signal   ctrl_uart_tx_ready : std_logic;
    signal   ctrl_uart_tx_data  : std_logic_vector(7 downto 0);
 
+   -- Interface to MEGA65 video
+   signal   video_clk    : std_logic;
+   signal   video_rst    : std_logic;
+   signal   video_pos_x  : std_logic_vector(7 downto 0);
+   signal   video_pos_y  : std_logic_vector(7 downto 0);
+   signal   video_char   : std_logic_vector(7 downto 0);
+   signal   video_colors : std_logic_vector(15 downto 0);
+
    -- Control and Status for trafic generator
    signal   ctrl_start         : std_logic;
    signal   ctrl_active        : std_logic;
@@ -84,16 +99,10 @@ architecture synthesis of sdram_mega65r6 is
    signal   ctrl_stat_err_exp  : std_logic_vector(63 downto 0);
    signal   ctrl_stat_err_read : std_logic_vector(63 downto 0);
 
+   -- SDRAM tri-state control signals
    signal   sdram_dq_in   : std_logic_vector(15 downto 0);
    signal   sdram_dq_out  : std_logic_vector(15 downto 0);
    signal   sdram_dq_oe_n : std_logic_vector(15 downto 0); -- Output enable for DQ
-
-   signal   video_clk    : std_logic;
-   signal   video_rst    : std_logic;
-   signal   video_pos_x  : std_logic_vector(7 downto 0);
-   signal   video_pos_y  : std_logic_vector(7 downto 0);
-   signal   video_char   : std_logic_vector(7 downto 0);
-   signal   video_colors : std_logic_vector(15 downto 0);
 
 begin
 
@@ -123,6 +132,10 @@ begin
          vdac_blank_n_o       => vdac_blank_n_o,
          vdac_psave_n_o       => vdac_psave_n_o,
          vdac_sync_n_o        => vdac_sync_n_o,
+         hdmi_data_p_o        => hdmi_data_p_o,
+         hdmi_data_n_o        => hdmi_data_n_o,
+         hdmi_clk_p_o         => hdmi_clk_p_o,
+         hdmi_clk_n_o         => hdmi_clk_n_o,
          -- Connection to core
          ctrl_clk_o           => ctrl_clk,
          ctrl_rst_o           => ctrl_rst,
